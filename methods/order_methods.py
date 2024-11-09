@@ -1,6 +1,7 @@
 import requests
-from data import BASE_URL, ORDERS_URL, generate_order_data, STATIONS_SEARCH_URL
+from data import BASE_URL, ORDERS_URL, STATIONS_SEARCH_URL
 import allure
+from helper import generate_order_data
 
 
 class OrderMethods:

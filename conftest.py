@@ -2,7 +2,7 @@ import pytest
 import allure
 from methods.order_methods import OrderMethods
 from methods.courier_methods import CourierMethods
-from data import COURIER_PARAMS
+from helper import COURIER_PARAMS
 
 
 @pytest.fixture()

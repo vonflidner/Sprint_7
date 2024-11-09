@@ -1,30 +1,57 @@
-import requests
-import random
-import string
+from faker import Faker
+import allure
+
+fake = Faker("ru_RU")
+
+COLORS = ['BLACK', 'GREY']
 
 
-def register_new_courier_and_return_login_password():
-    def generate_random_string(length):
-        letters = string.ascii_lowercase
-        random_string = ''.join(random.choice(letters) for i in range(length))
-        return random_string
-
-    login_pass = []
-
-    login = generate_random_string(10)
-    password = generate_random_string(10)
-    first_name = generate_random_string(10)
-
-    payload = {
-        "login": login,
-        "password": password,
-        "firstName": first_name
+@allure.step("Генерация данных для заказа")
+def generate_order_data(metro_station=1, color=None):
+    order_data = {
+        "firstName": fake.first_name(),
+        "lastName": fake.last_name(),
+        "address": fake.address(),
+        "metroStation": metro_station,
+        "phone": fake.phone_number(),
+        "rentTime": fake.random_int(min=1, max=10),
+        "deliveryDate": fake.date_this_year().isoformat(),
+        "comment": fake.sentence(),
     }
 
-    response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+    if color is not None:
+        if isinstance(color, list):
+            for c in color:
+                if c not in COLORS:
+                    raise ValueError(f"Invalid color: {c}. Valid options are {COLORS}.")
+            order_data["color"] = color
+        else:
+            if color not in COLORS:
+                raise ValueError(f"Invalid color: {color}. Valid options are {COLORS}.")
+            order_data["color"] = [color]
 
-    if response.status_code == 201:
-        login_pass.append(login)
-        login_pass.append(password)
-        login_pass.append(first_name)
-    return login_pass
+    return order_data
+
+
+@allure.step("Получение данных о курьере")
+def get_courier_data():
+    return [
+        {
+            "login": fake.unique.user_name(),
+            "password": fake.password(),
+            "firstName": fake.first_name()
+        },
+        {
+            "login": fake.unique.user_name(),
+            "password": fake.password(),
+            "firstName": fake.first_name()
+        }
+    ]
+
+
+COURIER_PARAMS = get_courier_data()
+
+COURIER_INVALID_PARAMS = [
+    {"firstName": fake.first_name(), "password": fake.password()},
+    {"firstName": fake.first_name(), "login": fake.user_name()},
+]
